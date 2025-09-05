@@ -57,5 +57,5 @@ int _atoi(char *s)
 		return (0);
 
 	/* If positive, flip once. INT_MIN is returned directly when sign < 0. */
-	return (sign > 0) ? -acc : acc;
+	return ((sign > 0) ? -acc : acc);
 }
