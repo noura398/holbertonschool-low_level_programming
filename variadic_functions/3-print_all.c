@@ -48,13 +48,8 @@ static void print_string(va_list ap)
  */
 void print_all(const char * const format, ...)
 {
-	struct spec ops[] = {
-		{'c', print_char},
-		{'i', print_int},
-		{'f', print_float},
-		{'s', print_string},
-		{'\0', NULL}
-	};
+	char tags[] = {'c', 'i', 'f', 's', '\0'};
+	void (*funcs[])(va_list) = {print_char, print_int, print_float, print_string, NULL};
 	va_list ap;
 	unsigned int i = 0, j;
 	char *sep = "";
@@ -63,12 +58,12 @@ void print_all(const char * const format, ...)
 	while (format && format[i])
 	{
 		j = 0;
-		while (ops[j].t)
+		while (tags[j])
 		{
-			if (ops[j].t == format[i])
+			if (tags[j] == format[i])
 			{
 				printf("%s", sep);
-				ops[j].f(ap);
+				funcs[j](ap);
 				sep = ", ";
 				break;
 			}
