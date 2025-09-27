@@ -3,6 +3,17 @@
 #include <stdio.h>
 
 /**
+ * struct spec - maps a format tag to a printer
+ * @t: tag character
+ * @f: function to print the argument
+ */
+struct spec
+{
+	char t;
+	void (*f)(va_list);
+};
+
+/**
  * print_char - prints a char from va_list
  * @ap: argument list
  */
@@ -48,14 +59,16 @@ static void print_string(va_list ap)
  */
 void print_all(const char * const format, ...)
 {
-	typedef struct spec { char t; void (*f)(va_list); } spec_t;
-	spec_t ops[] = {
-		{'c', print_char}, {'i', print_int},
-		{'f', print_float}, {'s', print_string},
+	struct spec ops[] = {
+		{'c', print_char},
+		{'i', print_int},
+		{'f', print_float},
+		{'s', print_string},
 		{'\0', NULL}
 	};
 	va_list ap;
-	unsigned int i = 0, j;
+	unsigned int i = 0;
+	unsigned int j;
 	char *sep = "";
 
 	va_start(ap, format);
