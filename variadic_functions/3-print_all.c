@@ -49,7 +49,9 @@ static void print_string(va_list ap)
 void print_all(const char * const format, ...)
 {
 	char tags[] = {'c', 'i', 'f', 's', '\0'};
-	void (*funcs[])(va_list) = {print_char, print_int, print_float, print_string, NULL};
+	void (*funcs[])(va_list) = {
+		print_char, print_int, print_float, print_string, NULL
+	};
 	va_list ap;
 	unsigned int i = 0, j;
 	char *sep = "";
@@ -74,3 +76,4 @@ void print_all(const char * const format, ...)
 	printf("\n");
 	va_end(ap);
 }
+
