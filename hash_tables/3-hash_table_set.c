@@ -2,31 +2,20 @@
 #include <string.h>
 
 /**
- * hash_table_set - adds or updates an element in the hash table
- * @ht: pointer to the hash table
- * @key: key string (must not be empty)
- * @value: value string to store (will be duplicated)
+ * create_node - creates a new hash node
+ * @key: key string (already validated)
+ * @value: value string
  *
- * Return: 1 on success, 0 on failure
- *
- * Notes:
- * - If @key already exists, its value is replaced (old value is freed).
- * - On collision, the new node is inserted at the beginning of the list.
- * - If @value is NULL, it is treated as an empty string.
+ * Return: pointer to the new node, or NULL on failure
  */
-int hash_table_set(hash_table_t *ht, const char *key, const char *value)
+hash_node_t *create_node(const char *key, const char *value)
 {
-	unsigned long int idx;
-	hash_node_t *node, *cur;
+	hash_node_t *node;
 	char *kdup, *vdup;
 
-	if (ht == NULL || key == NULL || *key == '\0')
-		return (0);
-
-	/* duplicate inputs first so we can safely return on failure */
 	kdup = strdup(key);
 	if (kdup == NULL)
-		return (0);
+		return (NULL);
 
 	if (value == NULL)
 		vdup = strdup("");
@@ -36,36 +25,59 @@ int hash_table_set(hash_table_t *ht, const char *key, const char *value)
 	if (vdup == NULL)
 	{
 		free(kdup);
-		return (0);
+		return (NULL);
 	}
 
-	idx = key_index((const unsigned char *)key, ht->size);
-
-	/* check if key already exists: update its value */
-	cur = ht->array[idx];
-	while (cur != NULL)
-	{
-		if (strcmp(cur->key, key) == 0)
-		{
-			free(cur->value);
-			cur->value = vdup;
-			free(kdup); /* we don't need the duplicated key in update case */
-			return (1);
-		}
-		cur = cur->next;
-	}
-
-	/* not found: create a new node and add at head (handle collision) */
 	node = malloc(sizeof(hash_node_t));
 	if (node == NULL)
 	{
 		free(kdup);
 		free(vdup);
-		return (0);
+		return (NULL);
 	}
 
 	node->key = kdup;
 	node->value = vdup;
+	node->next = NULL;
+	return (node);
+}
+
+/**
+ * hash_table_set - adds or updates an element in the hash table
+ * @ht: pointer to the hash table
+ * @key: key string (must not be empty)
+ * @value: value string to store
+ *
+ * Return: 1 on success, 0 on failure
+ */
+int hash_table_set(hash_table_t *ht, const char *key, const char *value)
+{
+	unsigned long int idx;
+	hash_node_t *node, *cur;
+
+	if (ht == NULL || key == NULL || *key == '\0')
+		return (0);
+
+	idx = key_index((const unsigned char *)key, ht->size);
+	cur = ht->array[idx];
+
+	while (cur != NULL)
+	{
+		if (strcmp(cur->key, key) == 0)
+		{
+			free(cur->value);
+			cur->value = strdup(value ? value : "");
+			if (cur->value == NULL)
+				return (0);
+			return (1);
+		}
+		cur = cur->next;
+	}
+
+	node = create_node(key, value);
+	if (node == NULL)
+		return (0);
+
 	node->next = ht->array[idx];
 	ht->array[idx] = node;
 
